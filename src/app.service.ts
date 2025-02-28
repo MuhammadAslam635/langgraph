@@ -22,7 +22,7 @@ export class AppService {
 
   constructor() {
     this.llm = new ChatOpenAI({
-      apiKey: process.env.OPENAI_API_KEY || "your-api-key", // keep secure
+      apiKey: process.env.OPENAI_API_KEY || "your-api-key",
       modelName: "gpt-4o-mini",
     });
 
@@ -111,24 +111,24 @@ export class AppService {
   async toolNode(state: typeof MessagesAnnotation.State) {
     const results: ToolMessage[] = [];
     const lastMessage = state.messages.at(-1);
-  
+
     // Check if the last message contains tool calls.
     if (lastMessage instanceof AIMessage && lastMessage?.tool_calls && lastMessage.tool_calls.length > 0) {
       for (const toolCall of lastMessage.tool_calls) {
         if (!toolCall) {
           throw new Error("Tool call is missing or invalid.");
         }
-  
+
         const toolCallId = String(toolCall.id);
         const tool = this.toolsByName[toolCall.name];
-  
+
         if (!tool) {
           throw new Error(`Tool "${toolCall.name}" not found.`);
         }
-  
+
         // Invoke the tool with the provided arguments.
         const observation = await tool.invoke(toolCall.args);
-  
+
         // Create a ToolMessage with the tool's output,
         // using the tool call ID to correctly link the response.
         const toolMessage = new ToolMessage({
@@ -138,7 +138,7 @@ export class AppService {
         results.push(toolMessage);
       }
     }
-  
+
     return { messages: results };
   }
 
@@ -146,12 +146,12 @@ export class AppService {
   shouldContinue(state: typeof MessagesAnnotation.State) {
     const messages = state.messages;
     const lastMessage = messages.at(-1);
-  
+
     // If the last message contains any tool calls, route to the "tools" node.
-    if (lastMessage instanceof AIMessage && lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
+    if (lastMessage  instanceof AIMessage && lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
       return "tools";
     }
-  
+
     // Otherwise, end the graph.
     return "__end__";
   }
@@ -172,13 +172,13 @@ export class AppService {
       )
       .addEdge("tools", "llmCall")
       .compile();
-  
+
     return agentBuilder;
   }
 
   async runAgent(prompt: string) {
     const agent = await this.buildAgent();
-  
+
     // Invoke the agent with a user prompt.
     const messages = [
       {
