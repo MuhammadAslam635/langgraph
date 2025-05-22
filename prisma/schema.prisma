@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int           @id @default(autoincrement())
+  name            String?
+  email           String        @unique
+  password        String
+  emailVerifiedAt DateTime? // Made nullable
+  role            String        @default("user")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+  bookings        Booking[]
+  transactions    Transaction[]
+}
+
+model Flight {
+  id            Int       @id @default(autoincrement())
+  name          String?
+  slug          String    @unique
+  departure     String?
+  destination   String?
+  company       String?   @default("emrites")
+  flightDate    DateTime  @db.Date // stores date only (YYYY-MM-DD)
+  departureTime DateTime  @db.Time // stores time only (HH:mm:ss)
+  arrivalTime   DateTime  @db.Time // stores time only (HH:mm:ss)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  tickets       Ticket[]
+}
+
+model Ticket {
+  id        Int      @id @default(autoincrement())
+  type      String?  @default("economy")
+  price     Decimal  @default(100.00)
+  flight    Flight?  @relation(fields: [flightId], references: [id])
+  flightId  Int?
+  status    String?  @default("available")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  booking   Booking?
+}
+
+model Booking {
+  id          Int          @id @default(autoincrement())
+  user        User?        @relation(fields: [userId], references: [id])
+  userId      Int?
+  ticket      Ticket       @relation(fields: [ticketId], references: [id])
+  ticketId    Int          @unique
+  status      String?      @default("booked")
+  bookedBy    String?      @default("AI")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  transaction Transaction?
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  bookingId Int      @unique
+  charges   Decimal  @default(100.00)
+  status    String   @default("success")
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+}

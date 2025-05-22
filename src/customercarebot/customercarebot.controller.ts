@@ -8,7 +8,7 @@ export class CustomercarebotController {
   constructor(private readonly customercarebotService: CustomercarebotService) {}
  @Post('/customer-care')
  async airline(@Body('prompt') prompt:string){
-  return this.customercarebotService.startSimulation(prompt);
+  return this.customercarebotService.runSimulation(prompt);
  }
 
 }
